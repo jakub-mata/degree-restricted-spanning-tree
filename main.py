@@ -12,13 +12,6 @@ def parse_csv_file(filename: str) -> list[list[int]]:
     
     return input_matrix
 
-def calculate_edge_count(input_matrix: list[list[int]]):
-    count: int = 0
-    for row in input_matrix:
-        for val in row:
-            count += val
-    return count
-
 def encode(input_matrix: list[list[int]]):
     cnf: list[list[int]] = []
 
@@ -30,7 +23,6 @@ def encode(input_matrix: list[list[int]]):
         - o(i,j): given a root, if vertex i is above j in a typical top-to-bottom structure
     '''
 
-    edge_count = calculate_edge_count(input_matrix)
     VERTEX_AMOUNT = len(input_matrix)
     var_count = 4 * (VERTEX_AMOUNT ^ VERTEX_AMOUNT)
 
@@ -44,26 +36,33 @@ def encode(input_matrix: list[list[int]]):
 
     #undirected_graph
     for i in range(VERTEX_AMOUNT):
-        for j in range(i):
+        for j in range(i, VERTEX_AMOUNT):
             cnf.append([original_edge_var(i,j), -original_edge_var(j, i), 0])
             cnf.append([-original_edge_var(i,j), original_edge_var(j, i), 0])
 
     for i in range(VERTEX_AMOUNT):
-        for j in range(i):
+        for j in range(i, VERTEX_AMOUNT):
             cnf.append([spanning_tree_edge_var(i,j), -spanning_tree_edge_var(j, i), 0])
             cnf.append([-spanning_tree_edge_var(i,j), spanning_tree_edge_var(j, i), 0])
 
     ##follows graph input
     for i in range(VERTEX_AMOUNT):
-        for j in range(j):
+        for j in range(i, VERTEX_AMOUNT):
             cnf.append([-spanning_tree_edge_var(i, j), original_edge_var(i, j), 0])
 
     #degree constraint
 
     #every_vertex_in_spanning_tree
-
+    for i in range(VERTEX_AMOUNT):
+        clause: list[int] = []
+        for j in range(VERTEX_AMOUNT):
+            clause.append(spanning_tree_edge_var(i, j))
+        clause.append(0)
+        cnf.append(clause)
     
-
+    #connectivity
+    
+    #order
 
     return cnf, ""
 
