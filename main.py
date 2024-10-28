@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 import csv
 
+VERTEX_AMOUNT: int = 0
+
 def parse_csv_file(filename: str) -> list[list[int]]:
     input_matrix = []
     with open(filename, "r") as file:
@@ -10,13 +12,75 @@ def parse_csv_file(filename: str) -> list[list[int]]:
     
     return input_matrix
 
+def calculate_edge_count(input_matrix: list[list[int]]):
+    count: int = 0
+    for row in input_matrix:
+        for val in row:
+            count += val
+    return count
 
 def encode(input_matrix: list[list[int]]):
-    cnf: list[str] = []
-    return cnf, ""
+    cnf: list[list[int]] = []
+
+    '''
+    Var space:
+        - e(i,j): if an edge {i,j} is in the original graph
+        - s(i,j): if an edge {i,j} is in the spanning tree
+        - f(i,j): if there is a flow from vertex i to j, ensuring connectivity
+        - o(i,j): given a root, if vertex i is above j in a typical top-to-bottom structure
+    '''
+
+    edge_count = calculate_edge_count(input_matrix)
+    VERTEX_AMOUNT = len(input_matrix)
+    var_count = 4 * (VERTEX_AMOUNT ^ VERTEX_AMOUNT)
+
+    #construct graph
+    for i in range(VERTEX_AMOUNT):
+        for j in range(VERTEX_AMOUNT):
+            if input_matrix[i][j] == 1:
+                cnf.append([original_edge_var(i,j), 0])
+            else:
+                cnf.append([-original_edge_var(i,j), 0])
+
+    #undirected_graph
+    for i in range(VERTEX_AMOUNT):
+        for j in range(i):
+            cnf.append([original_edge_var(i,j), -original_edge_var(j, i), 0])
+            cnf.append([-original_edge_var(i,j), original_edge_var(j, i), 0])
+
+    for i in range(VERTEX_AMOUNT):
+        for j in range(i):
+            cnf.append([spanning_tree_edge_var(i,j), -spanning_tree_edge_var(j, i), 0])
+            cnf.append([-spanning_tree_edge_var(i,j), spanning_tree_edge_var(j, i), 0])
+
+    ##follows graph input
+    for i in range(VERTEX_AMOUNT):
+        for j in range(j):
+            cnf.append([-spanning_tree_edge_var(i, j), original_edge_var(i, j), 0])
+
+    #degree constraint
+
+    #every_vertex_in_spanning_tree
 
     
-def call_solver(cnf: list[str], vars: str, output_filename: str, solver:str = "glucose"):
+
+
+    return cnf, ""
+
+
+def original_edge_var(i: int, j: int) -> int:
+    return calculate_edge_var(i, j, 1)
+def spanning_tree_edge_var(i: int, j:int) -> int:
+    return calculate_edge_var(i, j, 2)
+def flow_var(i: int, j:int) -> int:
+    return calculate_edge_var(i, j, 3)
+def order_var(i: int, j:int) -> int:
+    return calculate_edge_var(i, j, 4)
+
+def calculate_edge_var(i: int, j: int, scale: int) -> int:
+    return scale * (i * VERTEX_AMOUNT + j) + 1
+    
+def call_solver(cnf: list[list[int]], vars: str, output_filename: str, solver:str = "glucose"):
     with open(output_filename, "w") as file:
         pass
     
