@@ -9,8 +9,31 @@ def parse_csv_file(filename: str) -> list[list[int]]:
         csv_reader = csv.reader(file, delimiter=",")
         for line in csv_reader:
             input_matrix.append(list(map(int, line)))
-    
     return input_matrix
+
+
+def validate_input_size(input_matrix: list[list[int]]) -> bool:
+    size: int = len(input_matrix[0])
+    for row in input_matrix:
+        if len(row) != size:
+            return False
+    return True
+
+def validate_undirected(input_matrix: list[list[int]]) -> bool:
+    for i in range(len(input_matrix[0])):
+        for j in range(len(input_matrix[0])):
+            if input_matrix[i][j] != input_matrix[j][i]:
+                return False
+    return True
+
+def validate_input(input_matrix: list[list[int]]) -> bool:
+    if not validate_input_size(input_matrix):
+        print("Incorrect matrix dimensions (not a square matrix)")
+        return False
+    if not validate_undirected(input_matrix):
+        print("Provided graph is not undirected, check edges")
+        return False
+    return True
 
 def encode(input_matrix: list[list[int]]):
     cnf: list[list[int]] = []
@@ -95,6 +118,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     input_matrix: list[list[int]] = parse_csv_file(args.input)
+    if not validate_input(input_matrix):
+        raise AssertionError("Invalid input")
+
     cnf, vars = encode(input_matrix)
     result = call_solver(cnf, vars, args.output)
     print(result)
