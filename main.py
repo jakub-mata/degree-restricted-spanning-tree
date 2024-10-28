@@ -5,10 +5,15 @@ VERTEX_AMOUNT: int = 0
 
 def parse_csv_file(filename: str) -> list[list[int]]:
     input_matrix = []
-    with open(filename, "r") as file:
-        csv_reader = csv.reader(file, delimiter=",")
-        for line in csv_reader:
-            input_matrix.append(list(map(int, line)))
+    try:
+        with open(filename, "r") as file:
+            csv_reader = csv.reader(file, delimiter=",")
+            for line in csv_reader:
+                input_matrix.append(list(map(int, line)))
+    except IOError as e:
+        print ("file error")
+        print (e)
+        
     return input_matrix
 
 
@@ -84,7 +89,7 @@ def encode(input_matrix: list[list[int]]):
         cnf.append(clause)
     
     #connectivity
-    
+
     #order
 
     return cnf, ""
@@ -114,7 +119,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-i", "--input", type=str, help="Filename for csv file with input")
     parser.add_argument("-o", "--output", type=str, help="Filename for the output file in cnf format")
-    parser.add_argument("-d", "--degree", type=int, help="Max degree of a spanning tree")
+    parser.add_argument("-d", "--degree", type=int, help="Max degree of a spanning tree", required=True)
     args = parser.parse_args()
 
     input_matrix: list[list[int]] = parse_csv_file(args.input)
