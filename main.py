@@ -1,7 +1,10 @@
 from argparse import ArgumentParser
 import csv
+import itertools
 
 VERTEX_AMOUNT: int = 0
+
+#WHAT IF DEGREE CONSTRAINT IS LARGER THAN VERTEX_AMOUNT
 
 def parse_csv_file(filename: str) -> list[list[int]]:
     input_matrix = []
@@ -13,7 +16,7 @@ def parse_csv_file(filename: str) -> list[list[int]]:
     except IOError as e:
         print ("file error")
         print (e)
-        
+
     return input_matrix
 
 
@@ -40,7 +43,20 @@ def validate_input(input_matrix: list[list[int]]) -> bool:
         return False
     return True
 
-def encode(input_matrix: list[list[int]]):
+def create_subsets(subset_size: int) -> list[tuple[int,...]]:
+    lst_of_verteces = [x for x in range(VERTEX_AMOUNT)]
+    subsets: list[tuple[int, ...]] = list(itertools.combinations(lst_of_verteces, subset_size))
+    return subsets
+
+def encode_degree_constraint(vertex: int, cnf: list[list[int]], subsets: list[tuple[int,...]]):
+    for subset in subsets:
+        clause: list[int] = []
+        for j in subset:
+            clause.append(-spanning_tree_edge_var(vertex, j))
+        clause.append(0)
+        cnf.append(clause)
+
+def encode(input_matrix: list[list[int]], degree_constraint: int):
     cnf: list[list[int]] = []
 
     '''
@@ -62,23 +78,20 @@ def encode(input_matrix: list[list[int]]):
             else:
                 cnf.append([-original_edge_var(i,j), 0])
 
-    #undirected_graph
-    for i in range(VERTEX_AMOUNT):
-        for j in range(i, VERTEX_AMOUNT):
-            cnf.append([original_edge_var(i,j), -original_edge_var(j, i), 0])
-            cnf.append([-original_edge_var(i,j), original_edge_var(j, i), 0])
-
+    #undirected_spanning_tree
     for i in range(VERTEX_AMOUNT):
         for j in range(i, VERTEX_AMOUNT):
             cnf.append([spanning_tree_edge_var(i,j), -spanning_tree_edge_var(j, i), 0])
             cnf.append([-spanning_tree_edge_var(i,j), spanning_tree_edge_var(j, i), 0])
 
-    ##follows graph input
+    #follows graph input
     for i in range(VERTEX_AMOUNT):
         for j in range(i, VERTEX_AMOUNT):
             cnf.append([-spanning_tree_edge_var(i, j), original_edge_var(i, j), 0])
 
     #degree constraint
+    for vertex in range(VERTEX_AMOUNT):
+        encode_degree_constraint(vertex, cnf, create_subsets(degree_constraint + 1))
 
     #every_vertex_in_spanning_tree
     for i in range(VERTEX_AMOUNT):
@@ -88,9 +101,22 @@ def encode(input_matrix: list[list[int]]):
         clause.append(0)
         cnf.append(clause)
     
-    #connectivity
+    #CONNECTIVITY
 
-    #order
+    #ORDER
+    #setup root
+    for j in range(VERTEX_AMOUNT):
+        cnf.append([order_var(0,j), 0])
+    #order_symmetry
+    for i in range(VERTEX_AMOUNT):
+        for j in range(VERTEX_AMOUNT):
+            cnf.append([order_var(i,j), -order_var(j,i), 0])
+            cnf.append([-order_var(i,j), order_var(j,i), 0])
+    #order transitivity
+    for i in range(VERTEX_AMOUNT):
+        for j in range(VERTEX_AMOUNT):
+            pass
+    #order follows flow
 
     return cnf, ""
 
@@ -126,6 +152,6 @@ if __name__ == "__main__":
     if not validate_input(input_matrix):
         raise AssertionError("Invalid input")
 
-    cnf, vars = encode(input_matrix)
+    cnf, vars = encode(input_matrix, args.d)
     result = call_solver(cnf, vars, args.output)
     print(result)
