@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import csv
 import itertools
+import subprocess
 
 VERTEX_AMOUNT: int = 0
 
@@ -68,7 +69,7 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
     '''
 
     VERTEX_AMOUNT = len(input_matrix)
-    var_count = 4 * (VERTEX_AMOUNT ^ VERTEX_AMOUNT)
+    var_count: int = 4 * (VERTEX_AMOUNT ^ VERTEX_AMOUNT)
 
     #construct graph
     for i in range(VERTEX_AMOUNT):
@@ -118,7 +119,7 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
             pass
     #order follows flow
 
-    return cnf, ""
+    return cnf, var_count
 
 
 def original_edge_var(i: int, j: int) -> int:
@@ -133,11 +134,16 @@ def order_var(i: int, j:int) -> int:
 def calculate_edge_var(i: int, j: int, scale: int) -> int:
     return scale * (i * VERTEX_AMOUNT + j) + 1
     
-def call_solver(cnf: list[list[int]], vars: str, output_filename: str, solver:str = "glucose"):
+def write_to_file_and_call_solver(output_filename: str, cnf: list[list[int]], vars: int, solver:str = "glucose"):
     with open(output_filename, "w") as file:
-        pass
-    
-    return 
+        file.write("p cnf " + str(vars) + " " + str(len(cnf)) + '\n')
+        for line in cnf:
+            file.write(' '.join(str(literal) for literal in line) + '\n')
+
+    #call the solver        
+    return subprocess.run(['./' + solver, '-model', output_filename], stdout=subprocess.PIPE)
+
+def print_result(result):
 
 
 if __name__ == "__main__":
@@ -153,5 +159,5 @@ if __name__ == "__main__":
         raise AssertionError("Invalid input")
 
     cnf, vars = encode(input_matrix, args.d)
-    result = call_solver(cnf, vars, args.output)
-    print(result)
+    result = write_to_file_and_call_solver(args.output, cnf, vars, args.output)
+    print_result(result)
