@@ -103,7 +103,7 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
         cnf.append(clause)
     
     #CONNECTIVITY
-
+    
     #ORDER
     #setup root
     for j in range(VERTEX_AMOUNT):
@@ -144,6 +144,26 @@ def write_to_file_and_call_solver(output_filename: str, cnf: list[list[int]], va
     return subprocess.run(['./' + solver, '-model', output_filename], stdout=subprocess.PIPE)
 
 def print_result(result):
+    UNSAT: int = 20
+    for line in result.stdout.decode('utf-8').split('\n'):
+        print(line)
+
+    if (result.returncode == UNSAT):
+        return
+    
+    model = []
+    for line in result.stdout.decode('utf-8').split('\n'):
+        if line.startswith("v"):    # there might be more lines of the model, each starting with 'v'
+            vars = line.split(" ")
+            vars.remove("v")
+            model.extend(int(v) for v in vars)      
+    model.remove(0)
+
+    print()
+    print("##################################################################")
+    print("#####################[ Human readable result ]####################")
+    print("##################################################################")
+    print()
 
 
 if __name__ == "__main__":
