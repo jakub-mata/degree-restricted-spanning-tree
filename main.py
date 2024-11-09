@@ -3,7 +3,7 @@ import csv
 import itertools
 import subprocess
 
-VERTEX_AMOUNT: int = 0
+VERTEX_AMOUNT = 0
 
 #WHAT IF DEGREE CONSTRAINT IS LARGER THAN VERTEX_AMOUNT
 
@@ -68,8 +68,9 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
         - o(i,j): given a root, if vertex i is above j in a typical top-to-bottom structure
     '''
 
+    global VERTEX_AMOUNT
     VERTEX_AMOUNT = len(input_matrix)
-    var_count: int = 4 * (VERTEX_AMOUNT ^ VERTEX_AMOUNT)
+    var_count: int = 3 * (VERTEX_AMOUNT * VERTEX_AMOUNT)
 
     #construct graph
     for i in range(VERTEX_AMOUNT):
@@ -102,22 +103,28 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
         clause.append(0)
         cnf.append(clause)
     
-    #CONNECTIVITY
-    
-    #ORDER
+    #ORDER (acyclicity)
     #setup root
     for j in range(VERTEX_AMOUNT):
         cnf.append([order_var(0,j), 0])
+    #order reflexivity
+    for j in range(VERTEX_AMOUNT):
+        cnf.append([order_var(j, j), 0])
     #order_symmetry
     for i in range(VERTEX_AMOUNT):
         for j in range(VERTEX_AMOUNT):
             cnf.append([order_var(i,j), -order_var(j,i), 0])
             cnf.append([-order_var(i,j), order_var(j,i), 0])
-    #order transitivity
+    #order transitivity (through edges and order itself)
     for i in range(VERTEX_AMOUNT):
         for j in range(VERTEX_AMOUNT):
-            pass
-    #order follows flow
+            for k in range(VERTEX_AMOUNT):
+                cnf.append([-order_var(i, j), order_var(i, k), 0])
+                cnf.append([-order_var(j, k), order_var(i, k), 0])
+                cnf.append([-spanning_tree_edge_var(j, k), order_var(i, k), 0])
+
+    #CONNECTIVITY
+
 
     return cnf, var_count
 
@@ -126,22 +133,22 @@ def original_edge_var(i: int, j: int) -> int:
     return calculate_edge_var(i, j, 1)
 def spanning_tree_edge_var(i: int, j:int) -> int:
     return calculate_edge_var(i, j, 2)
-def flow_var(i: int, j:int) -> int:
-    return calculate_edge_var(i, j, 3)
 def order_var(i: int, j:int) -> int:
+    return calculate_edge_var(i, j, 3)
+def flow_var(i: int, j:int) -> int:
     return calculate_edge_var(i, j, 4)
 
 def calculate_edge_var(i: int, j: int, scale: int) -> int:
     return scale * (i * VERTEX_AMOUNT + j) + 1
     
-def write_to_file_and_call_solver(output_filename: str, cnf: list[list[int]], vars: int, solver:str = "glucose"):
+def write_to_file_and_call_solver(output_filename: str, cnf: list[list[int]], vars: int, solver:str = "glucose-syrup"):
     with open(output_filename, "w") as file:
         file.write("p cnf " + str(vars) + " " + str(len(cnf)) + '\n')
         for line in cnf:
             file.write(' '.join(str(literal) for literal in line) + '\n')
 
     #call the solver        
-    return subprocess.run(['./' + solver, '-model', output_filename], stdout=subprocess.PIPE)
+    return subprocess.run(['./' + solver, '-model', '-verb=1', output_filename], stdout=subprocess.PIPE)
 
 def print_result(result):
     UNSAT: int = 20
@@ -151,6 +158,7 @@ def print_result(result):
     if (result.returncode == UNSAT):
         return
     
+    '''
     model = []
     for line in result.stdout.decode('utf-8').split('\n'):
         if line.startswith("v"):    # there might be more lines of the model, each starting with 'v'
@@ -164,6 +172,7 @@ def print_result(result):
     print("#####################[ Human readable result ]####################")
     print("##################################################################")
     print()
+    '''
 
 
 if __name__ == "__main__":
@@ -178,6 +187,6 @@ if __name__ == "__main__":
     if not validate_input(input_matrix):
         raise AssertionError("Invalid input")
 
-    cnf, vars = encode(input_matrix, args.d)
-    result = write_to_file_and_call_solver(args.output, cnf, vars, args.output)
+    cnf, vars = encode(input_matrix, args.degree)
+    result = write_to_file_and_call_solver(args.output, cnf, vars)
     print_result(result)
