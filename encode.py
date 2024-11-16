@@ -12,11 +12,11 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
         - e(i,j): if an edge {i,j} is in the original graph
         - s(i,j): if an edge {i,j} is in the spanning tree
         - o(i,j): given a root, if vertex i is above j in a typical top-to-bottom tree structure
-        - r(i,j): if there exists a path between i and j (reachability)
+        - p(i,j): if there exists a path between i and j
     '''
 
     VERTEX_AMOUNT: int = len(input_matrix)
-    var_count: int = 4 * (VERTEX_AMOUNT * VERTEX_AMOUNT)
+    var_count: int = 3 * (VERTEX_AMOUNT * VERTEX_AMOUNT) + (VERTEX_AMOUNT - 1) * (VERTEX_AMOUNT * VERTEX_AMOUNT)
 
     #construct graph
     for i in range(VERTEX_AMOUNT):
@@ -72,8 +72,8 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
                 cnf.append([-order_var(i,j,VERTEX_AMOUNT),-order_var(j,k,VERTEX_AMOUNT),order_var(i,k,VERTEX_AMOUNT), 0])
                 cnf.append([-order_var(i,j,VERTEX_AMOUNT),-spanning_tree_edge_var(j,k,VERTEX_AMOUNT),order_var(i,k,VERTEX_AMOUNT), 0])
 
-    #REACHABILITY
-    encoding_helpers.encode_edge_count(cnf, VERTEX_AMOUNT)
+    #CONNECTEDNESS
+    encoding_helpers.encode_connectedness(cnf, VERTEX_AMOUNT, input_matrix)
 
 
     return cnf, var_count
