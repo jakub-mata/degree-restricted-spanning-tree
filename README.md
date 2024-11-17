@@ -125,4 +125,4 @@ Done using `hyperfine`
 - simpleGraph_house.csv contains 5 verteces
 - fanoPlane.csv contains 6 verteces
 
-You can see the time needed to complete each problem depends not only on the amount of verteces but also the degree constraint. That is because the higher the degree, the more complex clauses (which also take longer to generate) are present. The time also rises exponentially, so the program wouldn't be able to compute a graph of more than around 100 verteces in a reasonable time.
+You can see the time needed to complete each problem depends not only on the amount of verteces but also the degree constraint. That is because the higher the degree, the more complex clauses (which also take longer to generate) are present. The time also rises exponentially, so the program wouldn't be able to compute a graph of more than around 100 verteces in a reasonable time.s
