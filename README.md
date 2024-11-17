@@ -1,6 +1,9 @@
 # degree-restricted-spanning-tree
 A student project for solving the [degree constrained spanning tree](https://en.wikipedia.org/wiki/Degree-constrained_spanning_tree) problem with SAT (using the [glucose solver](https://github.com/audemard/glucose/)).
 
+## Problem description
+Assume an undirected graph $G$. We want to try to find out if there is such a spanning tree where all its verteces have a degree less or equal to a certain $k\in \mathbb{N}$. 
+
 ## Usage
 
 The program is called like this
@@ -36,7 +39,11 @@ You can use example inputs in the `test_inputs` directory. Inputs with prefixes 
 - `simpleGraph_house.csv`: a graph which looks like a house, it should pass all degrees above 1
 - `completeGraph.csv`: contains a complete graph on 6 verteces, it should pass all degrees above 1
 - `fanoPlane.csv`: contains the well known [Fano plane](https://en.wikipedia.org/wiki/Fano_plane), should pass all degrees above 1
-- `k_3Satisfiable.csv`: looks like a diamond with 2 legs, both connecting at the same vertex (yes, this README requires imagination). It should not pass a degree constraint of 2, but it should pass 3 and above.
+- `k_3Satisfiable.csv`: looks like a diamond with 2 legs, both connecting at the same vertex (yes, this README requires imagination).
+It should not pass a degree constraint of 2, but it should pass 3 and above.
+- `largeGraph.csv`: a large graph not easily analyzable, it should pass all degrees above 1
+- `largeGraph_not_2.csv`: a large graph not easily analyzable, it should pass all degrees above 2
+
 
 
 ## Logic
@@ -119,3 +126,18 @@ $$
 $$
 \bigwedge_{j,i,t_1\neq t_2} x(i,t_1,j) \rightarrow \neg x(i,t_2,j)
 $$
+
+## Experiments
+Done using `hyperfine`
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
+|:---|---:|---:|---:|---:|
+| `python3 span_restriction.py -i test_inputs/largeGraph.csv -d 2` | 2.047 ± 0.014 | 2.031 | 2.080 | 30.77 ± 3.20 |
+| `python3 span_restriction.py -i test_inputs/largeGraph.csv -d 5` | 6.934 ± 0.036 | 6.891 | 7.010 | 104.23 ± 10.83 |
+| `python3 span_restriction.py -i test_inputs/simpleGraph_house.csv -d 2` | 0.067 ± 0.007 | 0.059 | 0.099 | 1.00 |
+| `python3 span_restriction.py -i test_inputs/fanoPlane.csv -d 3` | 0.089 ± 0.006 | 0.081 | 0.102 | 1.34 ± 0.17 |
+
+- largeGraph.csv contains 20 verteces
+- simpleGraph_house.csv contains 5 verteces
+- fanoPlane.csv contains 6 verteces
+
+You can see the time needed to complete each problem depends not only on the amount of verteces but also the degree constraint. That is because the higher the degree, the more complex clauses (which also take longer to generate) are present. The time also rises exponentially, so the program wouldn't be able to compute a graph of more than around 100 verteces in a reasonable time.
