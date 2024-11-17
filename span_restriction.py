@@ -8,8 +8,8 @@ import output_handler
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser = ArgumentParser()
-    parser.add_argument("-i", "--input", type=str, help="Filename for csv file with input")
-    parser.add_argument("-o", "--output", type=str, help="Filename for the output file in cnf format")
+    parser.add_argument("-i", "--input", type=str, help="Filename for csv file with input", required=True)
+    parser.add_argument("-o", "--output", type=str, help="Filename for the output file in cnf format", default="output.csv")
     parser.add_argument("-d", "--degree", type=int, help="Max degree of a spanning tree", required=True)
     args = parser.parse_args()
 
