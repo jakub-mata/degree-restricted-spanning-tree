@@ -15,8 +15,8 @@ if __name__ == "__main__":
 
     input_matrix: list[list[int]] = input_handling.parse_csv_file(args.input)
     if not input_handling.validate_input(input_matrix):
-        raise AssertionError("Invalid input")
-
-    cnf, vars = encode.encode(input_matrix, args.degree)
-    result = output_handler.write_to_file_and_call_solver(args.output, cnf, vars)
-    output_handler.print_result(result, len(input_matrix))
+        print("Invalid input")
+    else:
+        cnf, vars = encode.encode(input_matrix, args.degree)
+        result = output_handler.write_to_file_and_call_solver(args.output, cnf, vars)
+        output_handler.print_result(result, len(input_matrix))

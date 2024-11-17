@@ -18,10 +18,17 @@ def parse_csv_file(filename: str) -> list[list[int]]:
 
 
 def validate_input_size(input_matrix: list[list[int]]) -> bool:
+    if len(input_matrix) == 0:
+        return False
+    
     size: int = len(input_matrix[0])
     for row in input_matrix:
         if len(row) != size:
             return False
+    
+    if size != len(input_matrix):
+        return False
+    
     return True
 
 def validate_undirected(input_matrix: list[list[int]]) -> bool:
