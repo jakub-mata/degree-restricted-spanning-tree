@@ -62,70 +62,55 @@ It should not pass a degree constraint of 2, but it should pass 3 and above.
 
 #### Spanning tree setup
 - *Is undirected*:
-$$
-\bigwedge_{i\neq j} s(i,j) \leftrightarrow s(j,i)
-$$
-- *Follows original graph*:
-$$
-\bigwedge_{i,j} s(i,j) \rightarrow e(i,j)
-$$
-- *Every vertex is withing the spanning tree*:
-$$
-\bigwedge_i \bigvee_j s(i,j)
-$$
-- *k - degree constraint*: for all (k+1) large subsets of verteces (let the set containing all these subsets be $S$)
-$$
-\bigwedge_i \bigvee_{j\in s, s\in S} \neg s(i,j)
-$$
-This ensures there isn't a vertex with (k+1) or more neighbors.
 
+$$\bigwedge_{i\neq j} s(i,j) \leftrightarrow s(j,i)$$
+- *Follows original graph*:
+
+$$\bigwedge_{i,j} s(i,j) \rightarrow e(i,j)$$
+- *Every vertex is withing the spanning tree*:
+
+$$\bigwedge_i \bigvee_j s(i,j)$$
+- *k - degree constraint*: for all (k+1) large subsets of verteces (let the set containing all these subsets be $S$)
+
+$$\bigwedge_i \bigvee_{j\in s, s\in S} \neg s(i,j)$$
+
+This ensures there isn't a vertex with (k+1) or more neighbors.
 #### Order
 Order is necessary for ensuring acyclicity of the spanning tree.
 - root setup: a vertex that is at the top of the spanning tree
-$$
-\bigwedge_j o(0, j)
-$$
+
+$$\bigwedge_j o(0, j)$$
 - reflexivity:
-$$
-\bigwedge_i o(i,i)
-$$
+
+$$\bigwedge_i o(i,i)$$
 - anti-symmetry:
-$$
-\bigwedge_{j\neq i} o(i,j) \leftrightarrow \neg o(j,i)
-$$
+
+$$\bigwedge_{j\neq i} o(i,j) \leftrightarrow \neg o(j,i)$$
 - transitivity:
-$$
-\bigwedge_{i\neq j\neq k} o(i,j) \wedge o(j,k) \rightarrow o(i,k)
-$$
-$$
-\bigwedge_{i\neq j\neq k} o(i,j) \wedge s(i,j) \wedge s(j,k) \rightarrow o(j,k)
-$$
+
+$$\bigwedge_{i\neq j\neq k} o(i,j) \wedge o(j,k) \rightarrow o(i,k)$$
+
+$$\bigwedge_{i\neq j\neq k} o(i,j) \wedge s(i,j) \wedge s(j,k) \rightarrow o(j,k)$$
 
 #### Connectivity (reachability)
 Connectivity is reached by finding out if from a certain vertex (e.g. $0$) there is a path to all other verteces in the graph. The paths can have different lengths but there are at most $|V|$ long. Hence parameter $t$ in $x(i, t, j)$ ranges from $0$ (although we don't calculate paths from $0$ to $0$ since it's unnecessary) to $|V|-1$.
 - first position: vertex 0 appears at the start of the path to $j$
-$$
-\bigwedge_{j\neq 0} x(0, 0, j)  
-$$
+
+$$\bigwedge_{j\neq 0} x(0, 0, j)$$
 - end position: vertex j is somewhere on the path
-$$
-\bigwedge_{j\neq 0} \bigvee_{t\neq 0} x(0,t,j)
-$$
+
+$$\bigwedge_{j\neq 0} \bigvee_{t\neq 0} x(0,t,j)$$
 - flow to neighbors: if $i \neq j$ is in the path, we need to ensure some of its neighbors are as well in the next position in time. This is a slight problem since we do not know in advance its neighbors in the spanning tree, only in the original tree. But since neighbors in the original tree are a superset, we calculate those and then ensure the given neighbor has an edge to the vertex in the spanning tree. Assume the set of neighbors of a given vertex $i$ in the original tree as $N(i)$ with elements $n^i_1, n^i_2,...$
-$$
-\bigwedge_{j, i \neq j, t<|V|-1} x(i,t,j) \rightarrow (x(n^i_1, t+1, j) \vee x(n^i_2, t+1, j) \vee ...)
-$$
-$$
-\bigwedge_{j,i\neq j,n\in N(i), t<|V|-1} x(i,t,j) \wedge x(n,t+1,j) \rightarrow s(i, n) 
-$$
+
+$$\bigwedge_{j, i \neq j, t<|V|-1} x(i,t,j) \rightarrow (x(n^i_1, t+1, j) \vee x(n^i_2, t+1, j) \vee ...)$$
+
+$$\bigwedge_{j,i\neq j,n\in N(i), t<|V|-1} x(i,t,j) \wedge x(n,t+1,j) \rightarrow s(i, n)$$
 - no 2 verteces at the same position in path:
-$$
-\bigwedge_{j, i_1 \neq i_2, t} x(i_1,t,j) \rightarrow \neg x(i_2,t,j)
-$$
+
+$$\bigwedge_{j, i_1 \neq i_2, t} x(i_1,t,j) \rightarrow \neg x(i_2,t,j)$$
 - no vertex twice in the path:
-$$
-\bigwedge_{j,i,t_1\neq t_2} x(i,t_1,j) \rightarrow \neg x(i,t_2,j)
-$$
+
+$$\bigwedge_{j,i,t_1\neq t_2} x(i,t_1,j) \rightarrow \neg x(i,t_2,j)$$
 
 ## Experiments
 Done using `hyperfine`
