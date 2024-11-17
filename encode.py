@@ -72,7 +72,6 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
                 if k == i or k == j:
                     continue
                 cnf.append([-order_var(i,j,VERTEX_AMOUNT),-order_var(j,k,VERTEX_AMOUNT),order_var(i,k,VERTEX_AMOUNT), 0])
-                cnf.append([-order_var(i,j,VERTEX_AMOUNT),-spanning_tree_edge_var(j,k,VERTEX_AMOUNT),order_var(i,k,VERTEX_AMOUNT), 0])
                 cnf.append([-spanning_tree_edge_var(i,j,VERTEX_AMOUNT),-spanning_tree_edge_var(j,k,VERTEX_AMOUNT),-order_var(i,j,VERTEX_AMOUNT),order_var(j,k,VERTEX_AMOUNT), 0])
 
     #CONNECTEDNESS
