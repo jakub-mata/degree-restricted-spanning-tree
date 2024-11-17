@@ -24,66 +24,65 @@ def get_neighbors(vertex: int, input_matrix: list[list[int]]) -> list:
 def encode_connectedness(cnf: list[list[int]], vertex_amount: int, input_matrix: list[list[int]]) -> None:
     '''
     var space:
-        x(i,t,p): vertex i is at position t in path p
+        x(i,t,j): vertex i is at position t in a path ending at j
     '''
 
-    for j in range(1, vertex_amount):
-        #path from (0 to j)
-        path = path_offset(0, j, vertex_amount)
-
+    for j in range(1, vertex_amount):  #path from (0 to j)
         #start
-        cnf.append([path_var(0, 0, path, vertex_amount), 0])
-
+        cnf.append([path_var(0, 0, j, vertex_amount), 0])
         #end is somewhere
-        for t in range(0, vertex_amount):
-            cnf.append([path_var(0,t,path, vertex_amount), 0])
+        end_clause = []
+        for t in range(1, vertex_amount):
+            end_clause.append(path_var(j,t,j, vertex_amount))
+        end_clause.append(0)
+        cnf.append(end_clause)
 
         #follow input
         for i in range(0, vertex_amount):
             if i == j: continue  #stop at the end of path
+            neighbors = get_neighbors(i, input_matrix)
             for t in range(vertex_amount - 1):
-                neighbors = get_neighbors(i, input_matrix)
-                clause = [path_var(i, t, path, vertex_amount)]
+                clause = [-path_var(i, t, j, vertex_amount)]
                 for neighbor in neighbors:
-                    clause.append(path_var(neighbor,t+1,path, vertex_amount))
+                    clause.append(path_var(neighbor,t+1,j, vertex_amount))
                     cnf.append([
-                        -path_var(i, t, path, vertex_amount),
-                        -path_var(neighbor, t+1, path, vertex_amount),
+                        -path_var(i, t, j, vertex_amount),
+                        -path_var(neighbor, t+1, j, vertex_amount),
                         spanning_tree_edge_var(i, neighbor, vertex_amount), 
                         0])
                 clause.append(0)
                 cnf.append(clause)
-
+        
         #no 2 verteces at the same time in the path
         for t in range(0, vertex_amount):
-            for i in range(vertex_amount):
-                for j in range(i+1, vertex_amount):
-                    cnf.append([-path_var(i, t, path, vertex_amount),-path_var(j, t, path, vertex_amount),0])
-
+            for i1 in range(vertex_amount):
+                for i2 in range(i1+1, vertex_amount):
+                    cnf.append([-path_var(i1, t, j, vertex_amount),-path_var(i2, t, j, vertex_amount),0])
+        
         #no vertex twice on the same path
         for i in range(vertex_amount):
             for t1 in range(vertex_amount):
                 for t2 in range(t1+1, vertex_amount):
-                    cnf.append([-path_var(i, t1, path, vertex_amount), -path_var(i, t2, path, vertex_amount),0])
+                    cnf.append([-path_var(i, t1, j, vertex_amount), -path_var(i, t2, j, vertex_amount),0])
+        
 
 
 def original_edge_var(i: int, j: int, vertex_amount: int) -> int:
     return calculate_edge_var(i, j, 0, vertex_amount)
+
 def spanning_tree_edge_var(i: int, j:int, vertex_amount: int) -> int:
     return calculate_edge_var(i, j, 1, vertex_amount)
+
 def order_var(i: int, j:int, vertex_amount: int) -> int:
     return calculate_edge_var(i, j, 2, vertex_amount)
 
 def calculate_edge_var(i: int, j: int, scale: int, vertex_amount: int) -> int:
     return (scale * vertex_amount * vertex_amount) + (i * vertex_amount + j) + 1
 
-def path_var(i: int, position: int, path: int, vertex_amount: int) -> int:
+def path_var(i: int, position: int, end: int, vertex_amount: int) -> int:
     start = 3 * vertex_amount * vertex_amount
-    offset = (path-1) * vertex_amount * vertex_amount
-    return start + offset + (i * vertex_amount + position) + 1
-
-def path_offset(i: int, j: int, vertex_amount: int) -> int:
-    return i*vertex_amount + j
+    path_offset = (end-1) * vertex_amount * vertex_amount  #|V| time positions, |V| verteces
+    return start + path_offset + (i * vertex_amount + position) + 1
 
 
     

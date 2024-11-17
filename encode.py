@@ -50,7 +50,7 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
         cnf.append(clause)
     
     #ORDER (acyclicity)
-    #setup root
+    #setup root (as vertex 0)
     for j in range(VERTEX_AMOUNT):
         cnf.append([order_var(0,j, VERTEX_AMOUNT), 0])
     #order reflexivity
@@ -61,16 +61,19 @@ def encode(input_matrix: list[list[int]], degree_constraint: int):
         for j in range(VERTEX_AMOUNT):
             if j == i: #breaks reflexivity
                 continue
-            cnf.append([order_var(i,j, VERTEX_AMOUNT), -order_var(j,i, VERTEX_AMOUNT), 0])
-            cnf.append([-order_var(i,j, VERTEX_AMOUNT), order_var(j,i,VERTEX_AMOUNT), 0])
+            cnf.append([order_var(i,j, VERTEX_AMOUNT), order_var(j,i, VERTEX_AMOUNT), 0])
+            cnf.append([-order_var(i,j, VERTEX_AMOUNT), -order_var(j,i,VERTEX_AMOUNT), 0])
     #order transitivity (through edges and order itself)
     for i in range(VERTEX_AMOUNT):
         for j in range(VERTEX_AMOUNT):
+            if j == i:
+                continue
             for k in range(VERTEX_AMOUNT):
-                if i == j or j == k or i == k:
+                if k == i or k == j:
                     continue
                 cnf.append([-order_var(i,j,VERTEX_AMOUNT),-order_var(j,k,VERTEX_AMOUNT),order_var(i,k,VERTEX_AMOUNT), 0])
                 cnf.append([-order_var(i,j,VERTEX_AMOUNT),-spanning_tree_edge_var(j,k,VERTEX_AMOUNT),order_var(i,k,VERTEX_AMOUNT), 0])
+                cnf.append([-spanning_tree_edge_var(i,j,VERTEX_AMOUNT),-spanning_tree_edge_var(j,k,VERTEX_AMOUNT),-order_var(i,j,VERTEX_AMOUNT),order_var(j,k,VERTEX_AMOUNT), 0])
 
     #CONNECTEDNESS
     encoding_helpers.encode_connectedness(cnf, VERTEX_AMOUNT, input_matrix)
