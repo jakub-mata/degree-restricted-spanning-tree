@@ -14,7 +14,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     input_matrix: list[list[int]] = input_handling.parse_csv_file(args.input)
-    if not input_handling.validate_input(input_matrix):
+    if not input_handling.validate_input(input_matrix) or args.degree <= 0:
         print("Invalid input")
     else:
         cnf, vars = encode.encode(input_matrix, args.degree)
