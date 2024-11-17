@@ -31,6 +31,14 @@ Please realize the matrix has to be square and contain the same amount of number
 
 You can check for examples in the test_inputs directory.
 
+### Example inputs
+You can use example inputs in the `test_inputs` directory. Inputs with prefixes `fail_` contain somehow failing input. Usable examples include:
+- `simpleGraph_house.csv`: a graph which looks like a house, it should pass all degrees above 1
+- `completeGraph.csv`: contains a complete graph on 6 verteces, it should pass all degrees above 1
+- `fanoPlane.csv`: contains the well known [Fano plane](https://en.wikipedia.org/wiki/Fano_plane), should pass all degrees above 1
+- `k_3Satisfiable.csv`: looks like a diamond with 2 legs, both connecting at the same vertex (yes, this README requires imagination). It should not pass a degree constraint of 2, but it should pass 3 and above.
+
+
 ## Logic
 
 ### Variable space
@@ -81,9 +89,6 @@ $$
 - transitivity:
 $$
 \bigwedge_{i\neq j\neq k} o(i,j) \wedge o(j,k) \rightarrow o(i,k)
-$$
-$$
-\bigwedge_{i\neq j\neq k} o(i,j) \wedge s(j,k) \rightarrow o(i,k)
 $$
 $$
 \bigwedge_{i\neq j\neq k} o(i,j) \wedge s(i,j) \wedge s(j,k) \rightarrow o(j,k)
