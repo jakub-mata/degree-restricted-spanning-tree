@@ -27,6 +27,8 @@ def print_result(result, vertex_amount):
         print(line)
 
     if (result.returncode == UNSAT):
+        print("RESULTS:")
+        print("Unfortunately, after careful consideration, we've come to the conclusion that your graph does not satisfy given parameters.")
         return
     
     model = []
@@ -41,6 +43,10 @@ def print_result(result, vertex_amount):
     print("##################################################################")
     print("#####################[ Human readable result ]####################")
     print("##################################################################")
+    print()
+
+    print("CONGRATULATIONS, there is a solution.")
+    print("An example (not necessarily the only one) spanning tree satisfying your conditions represented as an adjacency matrix:")
     print()
 
     graph: list[list[int]] = graph_from_model(model, vertex_amount)
